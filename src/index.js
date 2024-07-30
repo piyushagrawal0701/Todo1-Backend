@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const connectDB = require('./db/index.js');
 const serverless = require('serverless-http');
 
 const app = express();
@@ -12,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
+const connectDB = require('./db/index.js');
 connectDB();
 
 // Todo Schema and Model
@@ -70,5 +70,4 @@ router.delete('/api/todos/:id', async (req, res) => {
 // Use the router
 app.use('/api', router);
 
-module.exports.handler = serverless(app);// Route for serverless functions
-
+module.exports.handler = serverless(app); // Export the serverless handler
