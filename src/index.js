@@ -67,6 +67,8 @@ router.delete('/api/todos/:id', async (req, res) => {
   }
 });
 
-app.use('/.netlify/functions/server', router); // Route for serverless functions
+// Use the router
+app.use('/api', router);
 
-module.exports.handler = serverless(app); // Export the serverless handler
+module.exports.handler = serverless(app);// Route for serverless functions
+
