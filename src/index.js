@@ -3,9 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const connectDB = require('./db/index.js');
-const router = express.Router();
-const serverless = require("serverless-http")
-
+const serverless = require("serverless-http");
 
 const app = express();
 
@@ -24,12 +22,12 @@ const todoSchema = new mongoose.Schema({
 const Todo = mongoose.model('Todo', todoSchema);
 
 // Routes
-router.get('/api/todos', async (req, res) => {
+app.get('/api/todos', async (req, res) => {
   const todos = await Todo.find();
   res.json(todos);
 });
 
-router.post('/api/todos', async (req, res) => {
+app.post('/api/todos', async (req, res) => {
   const newTodo = new Todo({
     title: req.body.title,
     completed: false,
@@ -38,20 +36,21 @@ router.post('/api/todos', async (req, res) => {
   res.json(savedTodo);
 });
 
-router.put('/api/todos/:id', async (req, res) => {
+app.put('/api/todos/:id', async (req, res) => {
   const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
   res.json(updatedTodo);
 });
 
-router.delete('/api/todos/:id', async (req, res) => {
+app.delete('/api/todos/:id', async (req, res) => {
   await Todo.findByIdAndDelete(req.params.id);
   res.json({ message: 'Todo deleted' });
-});
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
 });
 
 app.use('/.netlify/functions/server', router);  // Route for serverless functions
 
 module.exports.handler = serverless(app);  // Export the serverless handler
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
