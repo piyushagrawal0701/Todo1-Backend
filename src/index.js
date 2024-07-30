@@ -46,7 +46,7 @@ app.delete('/api/todos/:id', async (req, res) => {
   res.json({ message: 'Todo deleted' });
 });
 
-app.use('/.netlify/functions/server', router);  // Route for serverless functions
+app.use('/.netlify/functions/server', app);  // Route for serverless functions
 
 module.exports.handler = serverless(app);  // Export the serverless handler
 
