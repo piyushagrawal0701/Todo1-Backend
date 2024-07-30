@@ -3,11 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const connectDB = require('./db/index.js');
-const router = express.Router();
-const serverless = require("serverless-http")
-
+const serverless = require('serverless-http');
 
 const app = express();
+const router = express.Router();
 
 app.use(cors());
 app.use(express.json());
@@ -21,37 +20,53 @@ const todoSchema = new mongoose.Schema({
   completed: Boolean,
 });
 
-const Todo = mongoose.model('Todo', todoSchema);
+const Todo = mongoose.models.Todo || mongoose.model('Todo', todoSchema);
 
 // Routes
 router.get('/api/todos', async (req, res) => {
-  const todos = await Todo.find();
-  res.json(todos);
+  try {
+    const todos = await Todo.find();
+    res.json(todos);
+  } catch (error) {
+    console.error('Error fetching todos:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 });
 
 router.post('/api/todos', async (req, res) => {
-  const newTodo = new Todo({
-    title: req.body.title,
-    completed: false,
-  });
-  const savedTodo = await newTodo.save();
-  res.json(savedTodo);
+  try {
+    const newTodo = new Todo({
+      title: req.body.title,
+      completed: false,
+    });
+    const savedTodo = await newTodo.save();
+    res.json(savedTodo);
+  } catch (error) {
+    console.error('Error creating todo:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 });
 
 router.put('/api/todos/:id', async (req, res) => {
-  const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updatedTodo);
+  try {
+    const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedTodo);
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 });
 
 router.delete('/api/todos/:id', async (req, res) => {
-  await Todo.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Todo deleted' });
+  try {
+    await Todo.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Todo deleted' });
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
-});
+app.use('/.netlify/functions/server', router); // Route for serverless functions
 
-app.use('/.netlify/functions/server', router);  // Route for serverless functions
-
-module.exports.handler = serverless(app);  // Export the serverless handler
+module.exports.handler = serverless(app); // Export the serverless handler
